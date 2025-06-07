@@ -1,0 +1,741 @@
+---
+title: "Exploring Global Happiness: A Comprehensive Analysis of the Impact of Socio-Economic Factors and Health on Happiness Scores Across Regions"
+author: "Prakruthi Harish"
+date: "2024-08-19"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+
+# Set a CRAN mirror
+options(repos = c(CRAN = "https://cran.rstudio.com/"))
+
+```
+## Section 1: Background
+
+This project addresses the crucial question of what drives global happiness, moving beyond traditional economic measures like GDP. It focuses on how various socio-economic factors influence the Life Ladder score, a key indicator of happiness, and how these influences differ across regions and countries. Understanding these dynamics is vital for policymakers aiming to improve citizens' quality of life. Using data from the World Happiness Report, the project analyzes variables such as GDP per capita, social support, life expectancy, freedom of choice, generosity, and perceptions of corruption. 
+
+By exploring these factors, the project highlights patterns and correlations that explain variations in happiness globally, offering data-driven insights for policy interventions. Helliwell et.al (2019) in the World Happiness Report emphasized the impact of economic and social factors on happiness. This project expands on that analysis by incorporating a broader range of economic measures and offering a multi-regional perspective. By examining these factors over time, the project provides deeper insights into the trends that shape global happiness.
+
+The primary objective is to understand the correlation between various factors and their impact on happiness, identifying region-specific trends and global patterns. The project employs exploratory data analysis (EDA), using statistical tests and visualizations like histograms, Q-Q plots, box plots, and interactive dashboards. These findings offer actionable solutions for enhancing well-being worldwide.
+
+----------
+
+## Section 2: Methods
+
+This project analyzes two key datasets from the World Happiness Report: one covering 2005-2023 for a broad temporal view, and another focused on 2024 for current socio-economic insights. These datasets, sourced from the World Happiness Report and Kaggle, are vital for understanding both short-term and long-term global well-being. The data, gathered through the Gallup World Poll, includes metrics like GDP per capita, social support, life expectancy, and more, across 150+ countries. The 2024 dataset contains 143 rows and 12 columns, while the 2005-2023 dataset has 2363 rows and 11 columns.
+
+2.2. Data Cleaning and Pre-processing
+
+It is essential to ensure that the data is clean and ready for exploration before starting the analysis. So the pre-processing step involved addressing missing values, non-ASCII characters, and other potential data inconsistencies. Missing values were handled by imputing them with the mean of the respective columns. This approach ensured that the data remained representative and accurate. Additionally, non-ASCII characters were removed from the country names to avoid errors during analysis and visualization. These pre-processing steps were crucial to maintain the integrity of the dataset and to ensure reliable results.
+
+----------
+
+2.3. Exploratory Data Analysis (EDA)
+
+The first step in the analysis carried out in this project was to explore the distribution of key variables, including Ladder score, GDP per capita, and Social Support. This was accomplished by visualizing the data through histograms, which provided initial insights into the overall trends and highlighted any anomalies or patterns in the data. However, while histograms provided a general sense of the data distribution, they did not offer detailed insights into the normality of the data. To address this, Q-Q plots were generated to more assess whether the variables followed a normal distribution. This step was crucial for determining the suitability of parametric statistical tests in subsequent analyses. However, Q-Q plots alone did not reveal how these distributions varied across different regions. In order to fill this gap box plots were employed to examine the regional distribution of Ladder scores within the 2024 dataset, offering a more granular view of how happiness varied across different regions. To further contextualize these findings, a pie chart was created to visualize the distribution of countries by region. This step clarified the sample size for each region, thereby enhancing the interpretation of the box plot findings. While this added a layer of understanding about regional representation, it still didn't explain how factors like health might influence happiness.
+
+Further analysis focused on the relationship between health and happiness, with the average Healthy Life Expectancy across regions being plotted to explore how disparities in health might influence regional happiness levels. An interactive choropleth map was then created to track changes in happiness scores over time. This dynamic approach allowed for a comprehensive understanding of global happiness trends over the years. However, this broader view needed to be complemented by a more focused analysis. Thus, a comparative analysis was conducted to identify the happiest and unhappiest countries based on their cumulative Ladder scores. This helped pinpoint specific countries that consistently ranked at the top or bottom of the happiness spectrum. This step was followed by statistical validation through normality checks and T-tests. 
+The correlations between various socio-economic factors and happiness were analyzed, both at the country and regional levels. To visualize the relationships between the Ladder score and various socio-economic factors, scatter plots with regression lines were created which confirmed the linearity and strength of these relationships. This provided a detailed view, yet to enhance the depth of analysis, an advanced interactive visualization was created. This allowed for a more granular exploration of how different factors influence happiness across regions. To further deepen the analysis, an advanced interactive visualization was created. This allowed for a more granular exploration of how different factors influence happiness across regions, offering a more nuanced understanding of the complex dynamics at play.
+
+The code to implement each of these methods, along with the results obtained, is presented below. The results include a series of visualizations and analyses that provide insights into the key drivers of happiness across the globe.
+
+Note: Please scroll down the Slidey page to explore the results and detailed analysis.
+
+----------
+
+## Section 3: Implementation and Results 
+
+3.1. Install and load libraries
+
+This step loads all the packages required for exploratory data visualization and analysis conducted in this project.
+
+```{r}
+### Installing and Loading Necessary Libraries
+install.packages("tidyverse")
+install.packages("skimr")
+install.packages("kableExtra")
+install.packages("lsa")
+install.packages("corrplot")
+install.packages("readr")
+install.packages("plotly")
+install.packages("reshape2")
+
+library(tidyverse)
+library(skimr)  
+library(kableExtra)
+library(lsa)
+library(corrplot)
+library(readr)
+library(plotly)
+library(reshape2)
+library(ggplot2)   
+library(dplyr) 
+
+```
+
+3.2. Load the Datasets 
+
+This step imports the datasets and provides a preliminary understanding of structure and content of data. This step helps identify data types and certain variable format inconsistencies in the datasets early in the process.
+
+```{r}
+
+# Load the datasets
+ds_2024 <- read.csv('https://raw.githubusercontent.com/VilcekSummerR/final-assignment-prakruthii-harish/main/World-happiness-report-2024.csv')
+ds_2023 <- read.csv('https://raw.githubusercontent.com/VilcekSummerR/final-assignment-prakruthii-harish/main/World-happiness-report-updated_2024.csv') 
+
+# Check the number of rows and columns in the 2024 dataset
+n_rows_2024 <- nrow(ds_2024)
+n_cols_2024 <- ncol(ds_2024)
+cat("The 2024 dataset has", n_rows_2024, "rows and", n_cols_2024, "columns.\n")
+n_rows_2023 <- nrow(ds_2023)
+n_cols_2023 <- ncol(ds_2023)
+cat("The 2005-2023 dataset has", n_rows_2023, "rows and", n_cols_2023, "columns.\n")
+
+# Inspect the datasets
+str(ds_2024)
+str(ds_2023)
+
+# View the first few rows of each dataset
+head(ds_2024)
+head(ds_2023)
+
+```
+3.3. Visualize data distributions
+
+Visualize the data with histogram to understand the distribution of key variables like Ladder score, GDP per capita, Social Support, etc., in both the datasets. This step provides a summary of the general trends in the data through histogram distribution plots.
+
+```{r}
+
+# Histograms for key variables in 2024 dataset
+par(mfrow=c(2, 3)) # Arrange plots in a 2x3 grid
+
+hist(ds_2024$Ladder.score, main="Histogram of Ladder Score (2024)", xlab="Ladder Score", col="skyblue", border="white")
+hist(ds_2024$Log.GDP.per.capita, main="Histogram of GDP per Capita (2024)", xlab="Log GDP per Capita", col="lightgreen", border="white")
+hist(ds_2024$Social.support, main="Histogram of Social Support (2024)", xlab="Social Support", col="lightcoral", border="white")
+hist(ds_2024$Healthy.life.expectancy, main="Histogram of Life Expectancy (2024)", xlab="Life Expectancy", col="darkgreen", border="white")
+hist(ds_2024$Freedom.to.make.life.choices, main="Histogram of Freedom of Choice (2024)", xlab="Freedom to Make Choices", col="lightpink", border="white")
+hist(ds_2024$Generosity, main="Histogram of Generosity (2024)", xlab="Generosity", col="lightblue", border="white")
+
+# Histograms for key variables in 2005-2023 dataset
+par(mfrow=c(2, 3)) # Arrange plots in a 2x3 grid
+
+hist(ds_2023$Life.Ladder, main="Histogram of Life Ladder (2005-23)", xlab="Life Ladder", col="skyblue", border="white")
+hist(ds_2023$Log.GDP.per.capita, main="Histogram of GDP per Capita (2005-23)", xlab="Log GDP per Capita", col="lightgreen", border="white")
+hist(ds_2023$Social.support, main="Histogram of Social Support (2005-23)", xlab="Social Support", col="lightcoral", border="white")
+hist(ds_2023$Healthy.life.expectancy.at.birth, main="Histogram of Life Expectancy (2005-23)", xlab="Life Expectancy", col="darkgreen", border="white")
+hist(ds_2023$Freedom.to.make.life.choices, main="Histogram of Freedom of Choice (2005-23)", xlab="Freedom to Make Choices", col="lightpink", border="white")
+hist(ds_2023$Generosity, main="Histogram of Generosity (2005-23)", xlab="Generosity", col="lightblue", border="white")
+
+```
+
+Analysis: The histograms provide a visual summary of the key variables from the two datasets, reflecting the overall trends and distributions. From the histograms it can be ascertained that, the distribution of ladder score is roughly symmetric which implies that, very few countries have extremely high or extremely low ladder scores in both the datasets. 
+However, the histograms of Log GDP per Capita of both the datasets are observed to be right-skewed (positively skewed) which highlights that most countries have been in the lower GDP per capita range, with very few countries being significantly wealthy. 
+
+In summary, the two datasets reveal trends in global well-being, with 2024 reflecting relatively high scores in happiness, social support, and life expectancy. However, over the longer period from 2005-2023, there’s more variability, especially in social support and life expectancy, suggesting that global trends have fluctuated over time, possibly due to varying global events and changes. This variability could be attributed to different global events and changes over the years, highlighting the importance of understanding these trends in the context of the data. However, the nature of non-normality seen in certain variables like, Log GDP per capita or Life expectancy will be further investigated in the next steps. 
+
+----------
+
+3.4. Data cleaning
+
+This step identifies and addresses any missing values in the datasets. This is because missing values can distort the observed patterns and trends. Therefore, it's essential to identify and address missing data to maintain the integrity of this Exploratory Data Analysis (EDA). 
+
+```{r}
+
+# Summarize the columns that contains at least one cell with a NULL value in the 2024 dataset
+
+null_ct_2024 <- ds_2024 %>% summarise_all(~sum(is.na(.)))
+null_col_names_2024 <- null_ct_2024 %>% select_if(~.>0)
+print(null_col_names_2024)
+
+# Summarize the columns that contains at least one cell with a NULL value in the 2005-2023 dataset
+
+null_ct_2023 <- ds_2023 %>% summarise_all(~sum(is.na(.)))
+null_col_names_2023 <- null_ct_2023 %>% select_if(~.>0)
+print(null_col_names_2023)
+
+```
+
+3.5. Handle missing values
+
+To handle missing values, 'NAs' and 'NaNs' are replaced with mean of the respective columns to ensure data integrity and consistency for further analysis. Here, 'grouping' ensures that calculating the 'mean' and filling in missing values are done within the context of each country, maintaining the integrity of country-specific data. And 'ungrouping' allows the 'mean' to be applied across the entire dataset, which is necessary for filling in any gaps left by the grouped operation.
+
+```{r}
+
+# Function to calculate mean excluding NA and NaN values
+
+mean_excluding_na_nan <- function(x) {
+  valid_values <- x[!is.na(x) & !is.nan(x)]
+  mean(valid_values)
+}
+
+# Handle missing values for Happiness report 2024 (dataset 1) - Group by Country.name and fill NA and NaN values with the mean of each country 
+ds_2024_clean <- ds_2024 %>%
+  group_by(Country.name) %>%
+  mutate(across(where(is.numeric), 
+                ~ifelse(is.na(.) | is.nan(.), mean_excluding_na_nan(.), .)))
+
+# Repeate the process without grouping for the countries that has all values in it as NA
+ds_2024_final <- ds_2024_clean %>%
+  ungroup() %>%
+  mutate(across(where(is.numeric), 
+                ~ifelse(is.na(.) | is.nan(.), mean_excluding_na_nan(.), .)))
+head(ds_2024_final)
+
+
+# Handle missing values for Happiness report 2005-2023 (dataset 2)
+
+ds_2023_clean <- ds_2023 %>%
+  mutate(across(where(is.numeric),
+   .fns = ~ifelse(is.na(.) | is.nan(.) | . ==0, mean_excluding_na_nan(.), .)))
+head(ds_2023_clean)
+
+```
+
+3.6. Normality Check Using Q-Q Plot
+
+The histogram visualization performed in Step 3 gave a quick sense of how data is spread across different values and showed how certain varibles deviated from the normal distribution. However, to specifically understand where the deviations occurs, a Normality check using Q-Q plot is performed in this step. These Q-Q plots serve as a follow-up to confirm the normality or non-normality suggested by the histograms. This step is a validation for the analysis made in Step 3.
+
+```{r}
+# Q-Q plots for normality checks in ds_2024
+par(mfrow=c(2, 3)) # Arrange plots in a 2x3 grid
+
+qqnorm(ds_2024$Ladder.score, main="Q-Q Plot of Ladder Score (2024)")
+qqline(ds_2024$Ladder.score, col="red")
+
+qqnorm(ds_2024$Log.GDP.per.capita, main="Q-Q Plot of GDP per Capita (2024)")
+qqline(ds_2024$Log.GDP.per.capita, col="red")
+
+qqnorm(ds_2024$Social.support, main="Q-Q Plot of Social Support (2024)")
+qqline(ds_2024$Social.support, col="red")
+
+qqnorm(ds_2024$Healthy.life.expectancy, main="Q-Q Plot of Life Expectancy (2024)")
+qqline(ds_2024$Healthy.life.expectancy, col="red")
+
+qqnorm(ds_2024$Freedom.to.make.life.choices, main="Q-Q Plot of Freedom to Make Choices (2024)")
+qqline(ds_2024$Freedom.to.make.life.choices, col="red")
+
+qqnorm(ds_2024$Generosity, main="Q-Q Plot of Generosity (2024)")
+qqline(ds_2024$Generosity, col="red")
+
+# Q-Q plots for normality checks in ds_2023
+par(mfrow=c(2, 3)) # Arrange plots in a 2x3 grid
+
+qqnorm(ds_2023$Life.Ladder, main="Q-Q Plot of Life Ladder (2005-23)")
+qqline(ds_2023$Life.Ladder, col="red")
+
+qqnorm(ds_2023$Log.GDP.per.capita, main="Q-Q Plot of GDP per Capita (2005-23)")
+qqline(ds_2023$Log.GDP.per.capita, col="red")
+
+qqnorm(ds_2023$Social.support, main="Q-Q Plot of Social Support (2005-23)")
+qqline(ds_2023$Social.support, col="red")
+
+qqnorm(ds_2023$Healthy.life.expectancy.at.birth, main="Q-Q Plot of Life Expectancy (2005-23)")
+qqline(ds_2023$Healthy.life.expectancy.at.birth, col="red")
+
+qqnorm(ds_2023$Freedom.to.make.life.choices, main="Q-Q Plot of Freedom to Make Choices (2005-23)")
+qqline(ds_2023$Freedom.to.make.life.choices, col="red")
+
+qqnorm(ds_2023$Generosity, main="Q-Q Plot of Generosity (2005-23)")
+qqline(ds_2023$Generosity, col="red")
+
+```
+
+Analysis: The Q-Q plots show that Ladder Scores in both the datasets mostly follows the red line (theoretical quantile) but there are slight deviations at both the ends (tails). This suggests a mostly normal distribution. Further, for GDP per capita, the Q-Q plots of both the datasets show some deviation from the line in the lower tail, which indicates the presence of lower-than-expected GDP values that don't align with the normal distribution. In summary, the Q-Q plots confirmed the findings from the histograms, providing a detailed visualization of how some variables in the data closely align with a normal distribution while few others seem to have a slight deviation from the normal (mostly right skewed). 
+
+----------
+
+3.7. Box Plot Analysis
+
+In the previous step, the Q-Q plots provided an overall assessment of the distribution of Ladder Score and other variables in the datasets. However, they did not offer insights into how these distributions differ across specific regions. Therefore, Box plots are employed in this step to specifically visualize the distribution of the Ladder Score across different regions in the 2024 dataset. This transition from a general examination of distributional normality to a more detailed investigation allows for the identification of regional variations and any outliers within the distribution.
+
+```{r}
+
+# Box plots for Ladder Score by Regional Indicator in ds_2024
+ggplot(ds_2024, aes(x = Regional.indicator, y = Ladder.score, fill = Regional.indicator)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Boxplot of Ladder Score by Region (2024)", x = "Region", y = "Ladder Score") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+Analysis: From the above boxplot visualization, we can identify that Western Europe has the highest ladder score and Sub-Saharan Africa has the lowest ladder score. Further, we can also identify that Middle East and North Africa has the largest spread in the distribution of the ladder score. On the contrary, North America and ANZ has the lowest spread. However, it is essential to understand the underlying structure of the data in terms of how many countries are contributing to each region's score.
+
+----------
+
+3.8. Distribution of Countries by Region
+
+The Box plots in the previous step, gave insights into the spread and central tendency of the Ladder Scores across regions, but they did not reveal whether these observations were based on a large or small number of countries, which could potentially affect the reliability and generalizability of the findings.
+
+By generating a Pie Chart that shows the distribution of countries by region, it is easier to visualize the number of countries represented in each region. This step adds context to the Box plot analysis by revealing the size of the sample from each region and providing an understanding of whether the observed trends in the Box plots are based on a large or small number of data points. 
+
+```{r}
+
+# Prepare the dataset - Group dataset 2024 by regional indicators and count the number of countries per region
+region_counts <- ds_2024_final %>%
+  group_by(Regional.indicator) %>%
+  summarise(Number_of_Countries = n()) %>%
+  mutate(percentage = Number_of_Countries / sum(Number_of_Countries) * 100)  # Calculate percentage
+
+# Create an interactive pie chart using plotly to visualize the distribution of countries across regions
+fig <- plot_ly(region_counts, 
+               labels = ~Regional.indicator, 
+               values = ~Number_of_Countries, 
+               type = 'pie',
+               #textinfo = 'label+percent',
+               hoverinfo = 'label+value') %>%
+               #textposition = 'inside') 
+  layout(title = 'Number of Countries per Region')
+
+# Display the interactive pie chart
+fig
+
+```
+
+Analysis: The pie chart reveals that Sub-Saharan Africa constitutes the largest proportion of countries among all regions, accounting for approximately 24.5% of the total sample. When this is correlated with the box plot findings, which showed that Sub-Saharan Africa has the lowest Ladder Scores, it suggests that a significant portion of the global dataset is represented by countries in this region, many of which report lower happiness scores. Likewise, Western Europe is represented by a considerable portion of the countries (14%) in the dataset, as shown in the pie chart. This substantial representation, along with the high Ladder Scores observed in the box plot for Western Europe in the previous step, suggests that the positive trends in happiness in this region are not isolated to a few countries but are instead reflective of a broader regional trend. However, the pie chart reveals that North America and ANZ have the lowest representation in the dataset, making up only 2.8% of the total countries. This region displayed a low spread in Ladder Scores in the previous step, which indicates a relatively consistent level of happiness within the region. However, the small sample size, as shown in the Pie Chart, suggests that these findings may require to be interpreted with caution.
+
+----------
+
+3.9. Mean Healthy Life Expectancy Across Regions
+
+In the previous steps, the analysis of the distribution of Ladder Scores and the number of countries per region provided insights into the overall happiness and its variability across different regions. However, happiness could be influenced by various factors, including health. So, to gain a deeper understanding of the regional differences in well-being, it is essential to examine 'Healthy Life Expectancy at birth', which is a critical component of overall quality of life and well-being. Healthy life expectancy is calculated as the average number of years a newborn infant would live in good health. The plot of 'Mean Healthy Life Expectancy across regions' adds another layer of understanding by highlighting the disparities in health, which could explain some of the observed differences in the Ladder Scores across different regions. 
+
+This step will establish a correlation between happiness and health, and provides a more holistic view of regional well-being. The analysis also helps reveal whether regions with higher Ladder Scores also have longer healthy life expectancy, providing further evidence for the relationship between health and happiness.
+
+
+```{r}
+
+# Mean of Healthy life expectancy of all countries per region
+library(RColorBrewer)
+
+region_summary <- ds_2024_final %>%
+  group_by(Regional.indicator) %>%
+  summarise(Healthy.life.expectancy = round(mean(Healthy.life.expectancy), digits = 4)*100)
+
+# Create a bar plot to visualize the average healthy life expectancy across regions
+colors <- brewer.pal(n = length(unique(region_summary$Regional.indicator)), name = "Set3") 
+ggplot(region_summary, aes(x = Regional.indicator, y = Healthy.life.expectancy, fill = Regional.indicator)) + 
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = Healthy.life.expectancy), vjust = 1.5, size = 3.5) + 
+  labs(title = "Average Healthy Life Expectancy across Regions",
+       x = "Regions",
+       y = "Years") +
+  scale_fill_manual(values = colors) +  
+  theme_minimal(base_size = 14) +  
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 10), 
+        axis.text.y = element_text(size = 12), 
+        axis.title = element_text(size = 12, face = "bold"),  
+        legend.position = "none",
+        plot.title = element_text(size = 18, face = "bold"))
+
+```
+
+Analysis: The bar plot shows that Western Europe has the highest average Healthy Life Expectancy, which aligns with its high Ladder Scores observed in the box plots. This suggests that the high happiness levels in Western Europe could be partly attributed to better health and longer life expectancy. Likewise, North America and ANZ also have a high average Healthy Life Expectancy, which corresponds to the relatively high Ladder Scores in this region. This supports the notion that regions with higher life expectancies tend to have higher happiness levels. However, Sub-Saharan Africa has the lowest Healthy Life Expectancy, which is consistent with its low Ladder Scores observed in the box plots. The combination of poor health and low life expectancy could be significant factors contributing to the lower Ladder Scores/ happiness levels in this region.
+
+In summary, the analysis of Healthy Life Expectancy provides crucial context for understanding the regional disparities in ladder scores (happiness) observed in the earlier steps. Regions with higher life expectancy generally exhibit higher ladder scores or happiness levels, reinforcing the importance of health as a key component of well-being.
+
+----------
+
+3.10. Analyze global happiness scores over entire time period
+
+In the previous steps, the analysis focused on regional trends and correlations between happiness, health, and other socio-economic factors. These analyses were primarily region-based, offering a high-level view of the data. The interactive choropleth map in this step provides a dynamic perspective on how happiness has changed over time across different countries, thereby offering insights into the overall trends in global happiness. This map offers a different perspective by emphasizing geographic distribution and temporal changes. By introducing the dimension of time (in years), the choropleth map enables an analysis of how happiness scores have evolved over time within specific countries.
+
+Pre-processing: When the analysis moves to a country-level comparison, particularly when visualizing data on a map (such as a choropleth map), the accuracy and consistency of country names become crucial. So, this data cleaning step is performed to ensure that the 'Country.name' column in the dataset is free of any encoding issues, non-ASCII characters, and other problematic strings that could cause errors during analysis or visualization. By setting the locale, converting text encoding, handling missing values, and removing invalid characters, the dataset is prepared for accurate and error-free plotting.
+
+```{r}
+
+Sys.setlocale("LC_ALL", "en_US.UTF-8")
+
+# Use iconv to remove invalid characters
+ds_2023_clean$Country.name <- iconv(ds_2023_clean$Country.name, from = "UTF-8", to = "ASCII//TRANSLIT")
+
+# Check for any remaining invalid strings
+ds_2023_clean$Country.name[is.na(ds_2023_clean$Country.name)] <- "Unknown"  # Handling NA values
+
+# Identify non-ASCII characters
+non_ascii <- ds_2023_clean[grepl("[^\x01-\x7F]", ds_2023_clean$Country.name), ]
+
+# Remove all non-ASCII characters
+ds_2023_clean$Country.name <- gsub("[^\x01-\x7F]", "", ds_2023_clean$Country.name)
+
+# Replace newline characters with a space
+ds_2023_clean$Country.name <- gsub("\n", " ", ds_2023_clean$Country.name, fixed = TRUE)
+
+# Check for any remaining problematic strings
+sum(is.na(ds_2023_clean$Country.name))  # Should be 0 if all invalid strings are removed or replaced
+
+```
+```{r}
+# Rename columns and prepare the dataset for creating a choropleth map
+ds_2023_choropleth <- ds_2023_clean %>%
+  rename(Country_name = Country.name,
+         Life_Ladder = Life.Ladder)
+
+# Sort the dataframe by year
+ds_2023_choropleth <- ds_2023_choropleth %>% arrange(year)
+
+# Create the choropleth map to visualize Life Ladder scores over the years
+fig_2023 <- plot_ly(ds_2023_choropleth, 
+               locations = ~Country_name, 
+               z = ~Life_Ladder, 
+               locationmode = 'country names', 
+               frame = ~year, 
+               type = 'choropleth', 
+               colors = 'Reds')
+
+# Update the layout with the title
+fig_2023 <- fig_2023 %>% layout(title = 'Happiness Score Comparison by Countries')
+
+# Display the plot
+fig_2023
+
+```
+
+Analysis: This interactive choropleth map provides the flexibility to observe the trends in Ladder scores across time (2005 - 2023) over different countries. In 2005, Denmark had the highest happiness score, followed by other happy countries such as Canada, Australia, Saudi Arabia, Spain, France, Sweden, the UK, and Venezuela. Conversely, Romania had the lowest happiness score, with Hungary, Iran, Pakistan, Poland, and Egypt also exhibiting low scores. In 2006, although most of the countries observed in the previous year are not visible, Venezuela still maintains a relatively high happiness score, albeit slightly lower than the previous year. Togo and Benin in West Africa have some of the lowest happiness scores, with 3.20 and 3.33, respectively. From 2007 to 2010, Canada consistently displayed high happiness scores, making it one of the happiest countries. Denmark, despite experiencing fluctuations, continued to hold the top spot until 2010 with a Ladder Score of 7.7.
+
+However, by 2015, Denmark dropped to the third position on the list of happiest countries, with Norway and Switzerland taking the first and second positions, respectively. Liberia and Yemen emerged as the least happy countries that year. In 2021, Finland topped the list with a happiness score of 7.79, followed by Denmark and Iceland, while Afghanistan remained at the bottom with a score of 2.43. In 2022, Afghanistan's Ladder Score further decreased to 1.28, keeping it at the bottom of the list, while Finland maintained its position at the top with a score of 7.72. Although Afghanistan's Ladder Score improved slightly to 1.46 in 2023 compared to 2022, it still ranked lowest on the happiness scale. Finland, for the third consecutive year since 2021, remained the happiest country.
+
+----------
+
+3.11. Comparative Analysis of Happiness Scores - Identify Happiest and Unhappiest Countries
+
+After the choropleth map, which provided a temporal and geographical overview of the Ladder scores across countries over time, the comparative analysis of happiness scores was performed to pinpoint specific countries that consistently rank as the happiest and unhappiest based on their cumulative Ladder scores. It transitions from broad, dynamic visualizations to a more focused analysis, allowing for the identification of specific outliers (both positive and negative) in terms of happiness.
+
+```{r}
+
+# Calculate total Life Ladder score for each country 
+total_life_ladder <- ds_2023_clean %>%
+  group_by(Country.name) %>%
+  summarise(Total_Life_Ladder = sum(Life.Ladder, na.rm = TRUE))
+
+# Identify top 3 happiest countries
+top_3_happiest <- total_life_ladder %>%
+  arrange(desc(Total_Life_Ladder)) %>%
+  head(3) %>%
+  mutate(Category = "Happiest")
+
+# Identify top 3 unhappiest countries
+top_3_unhappiest <- total_life_ladder %>%
+  arrange(Total_Life_Ladder) %>%
+  head(3) %>%
+  mutate(Category = "Unhappiest")
+
+# Combine happiest and unhappiest countries into one data frame
+top_countries <- bind_rows(top_3_happiest, top_3_unhappiest)
+
+# Create the bar plot with labels and displayed values
+p <- ggplot(top_countries, aes(x = reorder(Country.name, Total_Life_Ladder), y = Total_Life_Ladder, fill = Category)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = round(Total_Life_Ladder, 2)), vjust = 1, hjust = -0.2, size = 2) + # Add labels with values
+  coord_flip() +
+  labs(title = "3 Most Happiest and Unhappiest Countries (Total Life Ladder Score)",
+       x = "Country",
+       y = "Total Life Ladder Score") +
+  scale_fill_manual(values = c("Happiest" = "#b3e1f5", "Unhappiest" = "#f6bba3")) +
+  theme_minimal(base_size = 10) +
+  theme(axis.text.x = element_text(size = 8), 
+        axis.text.y = element_text(size = 8), 
+        axis.title = element_text(size = 10),
+        legend.title = element_blank())
+
+# Print the plot
+print(p)
+
+```
+
+Analysis of Bar Plots: The bar plot reveals the top three happiest and unhappiest countries based on their cumulative Ladder scores. Denmark, Sweden, and Canada have the highest cumulative happiness scores, indicating that these countries have maintained consistently high happiness levels over the years. While Guyana, Cuba, and Maldives have the lowest cumulative happiness scores, suggesting that these countries have consistently low happiness levels across the dataset's timespan. These findings differ from year-by-year analyses shown in the choropleth map, where countries might temporarily rise or fall in happiness rankings due to short-term factors that might not affect their long-term cumulative scores.
+
+In summary, these bar plots show a wide contrast in the happiness scores between the top 3 happiest and unhappiest countries, and this sets the stage for further analysis into the factors driving these differences.
+
+----------
+
+3.12. Check for Normality
+
+After identifying the happiest and unhappiest countries, it is essential to check the normality of the entire dataset and the subset of happiest and unhappiest countries to make appropriate selection of the statistical test to be performed. Understanding whether the data is normally distributed will guide the choice between parametric and non-parametric tests. And a Shapiro-Wilk normality test on the entire dataset ensures that the subsequent analysis is accurate and reliable. If the data is normally distributed, parametric tests such as the T-test, which have higher statistical power, can be used. If the data is not normally distributed, non-parametric tests would be more appropriate. 
+
+```{r}
+
+#Shapiro-Wilk normality test for 2005-2023 dataset
+shapiro_test_2023 <- shapiro.test(ds_2023_clean$Life.Ladder)
+print(shapiro_test_2023)
+
+# Shapiro-Wilk normality test for happiest and unhappiest countries combined
+shapiro_test_combined <- shapiro.test(top_countries$Total_Life_Ladder)
+print(shapiro_test_combined)
+
+```
+
+Analysis: Since p-value is way less than 0.05 in the entire dataset and the combined dataset of the subsets - happiest and unhappiest countries, these datasets do not follow a normal distribution. In case of combined datasets, this could be because of merging two datasets that have very different central tendencies (means). The happiest countries have much higher Life Ladder scores compared to the unhappiest countries, which might lead to a skewed distribution when combined. This could in turn cause the Shapiro-Wilk test on the combined data to indicate non-normality.
+
+However, focusing on the normally distributed subsets - the happiest and unhappiest countries individually, enables the advantages of parametric testing, such as greater power and precision, to be leveraged. This approach is crucial for understanding the sharp contrasts between the happiest and unhappiest countries. By isolating and analyzing these subsets, more meaningful comparisons between the extremes of the happiness spectrum can be made, providing clearer and more actionable insights.
+
+```{r}
+# Shapiro-Wilk normality test for the happiest and unhappiest countries individually
+shapiro_test_happiest <- shapiro.test(top_3_happiest$Total_Life_Ladder)
+shapiro_test_unhappiest <- shapiro.test(top_3_unhappiest$Total_Life_Ladder)
+
+print(shapiro_test_happiest)
+print(shapiro_test_unhappiest)
+
+```
+
+Analysis of Shapiro-Wilk Normality test: The p-value is greater than 0.05 for Happiest and Unhappiest countries (p-value = 0.3358 and p-value = 0.5181), indicating that the data for both the happiest and unhappiest countries individually are normally distributed.
+
+Thus, the data of Happiest and Unhappiest countries can be tested individually using a parametric test (T-test) since these two data when considered individually are normally distributed. T-test can be used to compare the mean happiness scores (Total Life Ladder) between the happiest and unhappiest countries. 
+
+----------
+
+3.13. Perform T- Test
+
+In order to statistically validate the differences between the happiest and unhappiest countries, a T-test is performed.
+
+```{r}
+
+# Perform the t-test separately for the happiest and unhappiest countries
+t_test_result_happiest <- t.test(top_3_happiest$Total_Life_Ladder)
+t_test_result_unhappiest <- t.test(top_3_unhappiest$Total_Life_Ladder)
+
+# Print the results
+print(t_test_result_happiest)
+print(t_test_result_unhappiest)
+
+```
+
+Analysis of the test: The Happiest Countries have a high mean happiness score (Total Life Ladder) of 133.96, which is statistically significant, as indicated by the low p-value (0.0002296) and a high t-value (65.99). This suggests that these countries consistently score very high on the happiness scale. However, the Unhappiest Countries have a much lower mean happiness score of 5.54, also statistically significant (p-value: 0.001828, t-value: 23.36). This confirms that these countries are at the opposite end of the happiness spectrum, but still have a score that is statistically above zero, indicating some level of happiness.
+
+In summary, the T-test results show that the happiest countries have a significantly higher mean happiness score (Total Life Ladder) compared to the unhappiest countries. The T-test confirms that the differences between these two groups are not just due to random chance but are statistically significant.
+
+----------
+
+3.14. Correlation Analysis of Factors Influencing Happiness
+
+After confirming the significant difference in happiness scores between the happiest and unhappiest countries, the next step is to understand what drives these differences. This step analyzes the correlation between various factors (such as GDP per capita, social support, etc.) and the Life Ladder score for the happiest and unhappiest countries. Understanding these relationships will help uncover the key factors influencing happiness in these countries.
+
+```{r}
+
+# The factor that most impacted the life ladder for the top 3 happiest and unhappiest countries
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# Filter data for these top countries
+top_countries_data <- ds_2023_clean %>%
+  filter(Country.name %in% top_countries$Country.name)
+
+# Check filtered data
+print(unique(top_countries_data$Country.name)) 
+
+# Calculate the correlation of each factor with Life Ladder for these countries
+impact_factors <- top_countries_data %>%
+  group_by(Country.name) %>%
+  summarize(
+    GDP_Cor = cor(Life.Ladder, Log.GDP.per.capita, use = "complete.obs"),
+    Social_Support_Cor = cor(Life.Ladder, Social.support, use = "complete.obs"),
+    Life_Expectancy_Cor = cor(Life.Ladder, Healthy.life.expectancy.at.birth, use = "complete.obs"),
+    Freedom_Choices_Cor = cor(Life.Ladder, Freedom.to.make.life.choices, use = "complete.obs"),
+    Generosity_Cor = cor(Life.Ladder, Generosity, use = "complete.obs"),
+    Corruption_Cor = cor(Life.Ladder, Perceptions.of.corruption, use = "complete.obs"),
+    .groups = "drop"
+  ) %>%
+  pivot_longer(cols = c(GDP_Cor, Social_Support_Cor, Life_Expectancy_Cor,
+                        Freedom_Choices_Cor, Generosity_Cor, Corruption_Cor),
+               names_to = "Factor", values_to = "Correlation") %>%
+  mutate(Factor = recode(Factor,
+                         "GDP_Cor" = "Log.GDP.per.capita",
+                         "Social_Support_Cor" = "Social.support",
+                         "Life_Expectancy_Cor" = "Healthy.life.expectancy.at.birth",
+                         "Freedom_Choices_Cor" = "Freedom.to.make.life.choices",
+                         "Generosity_Cor" = "Generosity",
+                         "Corruption_Cor" = "Perceptions.of.corruption")) %>%
+  group_by(Country.name) %>%
+  filter(!is.na(Correlation)) %>%
+  slice_max(order_by = abs(Correlation), n = 1, with_ties = FALSE) %>%
+  ungroup()
+
+# Check final impact factors
+print(impact_factors)
+
+```
+
+Analysis: The analysis reveals that different factors significantly impact happiness across these countries. In Canada and Denmark, the unexpected negative correlation between Healthy Life Expectancy and happiness suggests that longevity alone does not guarantee happiness; other factors related to the quality of life, healthcare systems, and social conditions might play a crucial role. In contrast, Sweden's positive correlation between Social Support and happiness underscores the importance of social connections and community support in enhancing well-being. These findings highlight the complex and multifaceted nature of happiness, demonstrating that it is influenced by a variety of factors that can differ significantly from one country to another. Understanding these relationships helps in identifying key areas for policy intervention and improvement to enhance overall well-being in different regions.
+
+----------
+
+3.15. Regional Correlation Analysis
+
+After examining the correlation factors in the happiest and unhappiest countries, it's important to expand the analysis to a regional level. This step explores how different factors correlate with happiness scores across various regions, helping to identify region-specific trends and influences.
+
+```{r}
+
+correlation_by_region <- ds_2024 %>%
+  group_by(Regional.indicator) %>%
+  summarize(
+    GDP_Cor = cor(Ladder.score, Log.GDP.per.capita, use = "complete.obs"),
+    Social_Support_Cor = cor(Ladder.score, Social.support, use = "complete.obs"),
+    Life_Expectancy_Cor = cor(Ladder.score, Healthy.life.expectancy, use = "complete.obs"),
+    Freedom_Choices_Cor = cor(Ladder.score, Freedom.to.make.life.choices, use = "complete.obs"),
+    Generosity_Cor = cor(Ladder.score, Generosity, use = "complete.obs"),
+    Corruption_Cor = cor(Ladder.score, Perceptions.of.corruption, use = "complete.obs")
+  ) %>%
+  pivot_longer(cols = GDP_Cor:Corruption_Cor, names_to = "Factor", values_to = "Correlation") %>%
+  ungroup()
+
+ggplot(correlation_by_region, aes(x = Factor, y = Regional.indicator, fill = Correlation)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "red", high = "blue", mid = "white", midpoint = 0, limit = c(-1, 1)) +
+  labs(title = "Correlation Heatmap of Ladder Score vs Factors Across Regions", x = "Factors", y = "Regions") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+Analysis: The heatmap reveals that the relationship between happiness and various socio-economic factors varies significantly across regions. Western Europe, North America, and ANZ consistently show positive correlations across multiple factors, suggesting that in these regions, improvements in economic and social conditions lead to higher happiness. On the other hand, regions like East Asia and Sub-Saharan Africa show weaker or even negative correlations with some factors, indicating that the drivers of happiness may be more complex or less directly linked to these specific variables. This heatmap underscores the importance of regional context in understanding the factors that influence happiness and suggests that a one-size-fits-all approach may not be appropriate when assessing global happiness metrics. It highlights the need for region-specific strategies to improve happiness and well-being.
+
+----------
+
+3.16. Analysis of happiness score vs socio-economic factors 
+
+The heatmap in the previous step underscores the importance of regional context in understanding the factors that influence happiness and suggests that a one-size-fits-all approach may not be appropriate when assessing global happiness metrics. It highlights the need for region-specific strategies to improve happiness and well-being. To further explore these regional trends and the relationships between happiness and various socio-economic factors, scatter plots with regression lines are created. This step provides a more detailed visualization, allowing for the examination of linearity and the strength of these relationships, thereby confirming and complementing the findings from the correlation analysis.
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(gridExtra)
+
+# Function to create scatter plots with Ladder score on the x-axis and a factor on the y-axis
+create_scatter_plot <- function(data, y_var, y_label) {
+  ggplot(data, aes(x = Ladder.score, y = !!sym(y_var))) +
+    geom_point(color = "white", fill = "#FBB4AE", 
+               size = 3, shape = 21, stroke = 1) +
+    geom_smooth(method = "lm", formula = y ~ x, color = "#CCEBC5", se = FALSE) +
+    labs(x = "Ladder Score", y = y_label) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 14, face = "bold"),
+      axis.text = element_text(size = 10),
+      axis.title = element_text(size = 12)
+    )
+}
+
+# Create individual scatter plots
+p1 <- create_scatter_plot(ds_2024, "Log.GDP.per.capita", "GDP per Capita")
+p2 <- create_scatter_plot(ds_2024, "Social.support", "Social Support")
+p3 <- create_scatter_plot(ds_2024, "Healthy.life.expectancy", "Life Expectancy")
+p4 <- create_scatter_plot(ds_2024, "Freedom.to.make.life.choices", "Freedom to Make Choices")
+p5 <- create_scatter_plot(ds_2024, "Generosity", "Generosity")
+p6 <- create_scatter_plot(ds_2024, "Perceptions.of.corruption", "Perception of Corruption")
+
+# Arrange plots in a 3x2 grid
+grid.arrange(p1, p2, p3, p4, p5, p6, ncol = 3)
+
+```
+
+Analysis: The scatter plots with regression lines reveal the following relationships between happiness (Ladder score) and socio-economic factors:
+
+GDP per Capita: A strong positive relationship, indicating that higher economic output per person is linked to greater happiness.
+Social Support: A positive correlation, suggesting that stronger social networks contribute significantly to higher happiness levels.
+Life Expectancy: A positive relationship, emphasizing that longer, healthier lives are associated with increased happiness.
+Freedom to Make Choices: A positive correlation, showing that greater autonomy and freedom in life choices lead to higher happiness.
+Generosity: A weaker correlation, indicating that while generosity contributes to happiness, it is less impactful than other factors like economic stability or social support.
+Perception of Corruption: A more complex and weaker positive relationship, suggesting that the impact of corruption on happiness varies and may be influenced by other mitigating factors.
+
+----------
+
+3.17. Interactive dashboard to investigate global impact of socio-economic factors on happiness 
+
+To enhance the depth of analysis, an advanced interactive visualization is created. This interactive plot allows for a more granular exploration of how different factors influence happiness across regions. By enabling the examination of region-specific correlations, this visualization provides an opportunity to interact with the data dynamically, offering deeper insights into the complex relationships between happiness and its drivers.
+
+Note: In slidey mode, every click, including those on dropdown menus, may advance to the next slide. After selecting variables from the dropdown, please manually navigate back to the page to explore the interactive dashboard. 
+
+```{r}
+# Create the interactive plot with updated filtering
+# Create a plotly object with separate traces for each region
+plot <- plot_ly()
+
+# Loop through each region and add a trace for it
+for (region in unique(correlation_by_region$Regional.indicator)) {
+  region_data <- correlation_by_region %>%
+    filter(Regional.indicator == region)
+  
+  plot <- plot %>%
+    add_trace(
+      data = region_data,
+      x = ~Factor,
+      y = ~Correlation,
+      type = 'bar',
+      name = region,
+      visible = ifelse(region == unique(correlation_by_region$Regional.indicator)[1], TRUE, FALSE),  # Show only the first region by default
+      hoverinfo = 'text',
+      #text = ~paste(Factor, ": ", round(Correlation, 2)),
+      hovertext = ~paste(Factor, ": ", round(Correlation, 2)),
+                         #, "<br>Value: ", round(Correlation, 2)),
+      marker = list(color = ~Correlation, showscale = FALSE)
+    )
+}
+
+# Add the dropdown menu
+plot <- plot %>%
+  layout(
+    title = 'Correlation of Factors with Ladder Score by Region',
+    xaxis = list(title = 'Factors', showticklabels = FALSE),  # Hide x-axis labels
+    yaxis = list(title = 'Correlation'),
+    showlegend = FALSE,  # Hide legend to keep the focus on hover info
+    updatemenus = list(
+      list(
+        active = 0,
+        buttons = lapply(unique(correlation_by_region$Regional.indicator), function(region) {
+          list(
+            method = "restyle",
+            args = list("visible", lapply(unique(correlation_by_region$Regional.indicator), function(x) x == region)),
+            label = region
+          )
+        }),
+        direction = "down",
+        pad = list(r = 10, t = 10),
+        showactive = TRUE,
+        x = 0.1,
+        xanchor = "left",
+        y = 1.2,
+        yanchor = "top"
+      )
+    )
+  )
+
+# Display the plot
+plot
+
+```
+
+Analysis: This interactive visualization provides a dynamic tool for exploring how different factors correlate with happiness across various regions. By allowing users to filter and compare regions, it offers a more detailed understanding of how regional contexts influence the relationship between different socio-economic factors and happiness.
+
+----------
+
+## Section 4: Conclusion and Future Scope
+
+This exploratory data analysis (EDA) has provided a comprehensive examination of the factors influencing global happiness. Through a combination of statistical tests and visualizations, key insights into the drivers of happiness have been uncovered, highlighting the importance of regional context and the significant role of economic and social factors. The analysis also reveals the complexity of the relationships that contribute to overall well-being.
+
+The advanced interactive visualization developed in this project serves as a powerful tool for further exploration, offering a dynamic way to delve deeper into the data. However, while the current analysis provides valuable insights, it also opens avenues for further exploration and refinement. Incorporating more sophisticated statistical techniques, such as multivariate regression or machine learning, could yield even deeper insights into the complex relationships between socio-economic factors and happiness.
+
+Additionally, the interactive dashboard could be enhanced with features like multi-factor analysis, real-time updates, and predictive modeling to offer more dynamic and actionable insights.
+
+This thorough EDA not only lays the foundation for more targeted research but also supports interventions aimed at improving happiness on both a global and regional scale.
+
+----------
+
+# References
+
+1. Helliwell JF, Layard R, Sachs JD. World Happiness Report 2019.
+
+2. Scatterplot with regression fit and automatic text repel – the R Graph Gallery [Internet]. [cited 2024 Aug 19]. Available from: https://r-graph-gallery.com/web-scatterplot-corruption-and-human-development.html
+ 
+3. Happiness of the younger, the older, and those in between [Internet]. worldhappiness.report. Available from: https://worldhappiness.report/ed/2024/happiness-of-the-younger-the-older-and-those-in-between/
+
+4. Tableau.com. 2024. Available from: https://public.tableau.com/app/profile/worldhappiness/viz/2024Draft/Figure2_
+
+5. World Happiness Report. Explore the World Happiness Report data [Internet]. worldhappiness.report. 2023. Available from: https://worldhappiness.report/data/
