@@ -1,1 +1,2 @@
 # WorldHappinessAnalysis
+Explored happiness scores across 147 countries using the World Happiness Report 2024 dataset, examining how GDP, social support, and life expectancy shape global well-being. Conducted regional comparisons and correlation analysis using R, revealing statistically significant patterns. Built interactive visualizations—such as choropleth maps and scatter plots—to highlight disparities and uncover socioeconomic drivers of happiness across 10 world regions.
